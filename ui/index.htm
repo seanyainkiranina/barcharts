@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+	  <head>
+		     <meta charset="utf-8">
+	         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+			 <meta name="description" content="Barcharts Test">
+			 <meta nam="author" content="John Palmer">
+		     <link rel="icon" href="/favicon.ico">
+
+		         <title>Stock Quotes</title>
+				 
+			         <link type="text/css" href="/bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet"> 
+    				 <link type="text/css" href="/bower_components/bootstrap/dist/css/bootstrap-theme.min.css" rel="stylesheet"> 
+			         <link type="text/css" href="/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css" rel="stylesheet"> 
+					
+          
+                    <style>
+					 
+					  .text-search {
+					  	-webkit-border-radius: 10px;
+						-moz-border-radius: 10px;
+						border-radius: 10px;
+						margin-top: 15px;
+					  }
+					  .btn-search{
+					  	-webkit-border-radius: 10px;
+						-moz-border-radius: 10px;
+						border-radius: 10px;
+						padding-top: 1px;
+						padding-bottom: 1px;
+					
+					  }
+								 
+					 </style>
+					 
+
+	  </head>
+
+					     <body>
+                             
+    <script type="application/javascript">
+    
+        var quotesTable = null;
+        function hideQuote(that){
+            window.event.preventDefault();
+            clearErrors();
+
+            $(that).closest('tr').hide();
+            var symbol=$(that).attr('data-symbol');
+            $.get('/delquote/' + encodeURI(symbol),function(data){
+                            quotesTable.ajax.reload();
+            }).fail(function(){
+                    $(that).closest('tr').show();
+                    $('#error').show();
+            });            
+
+        }
+        function militaryTimeConvertFrom(time){
+
+            time = time.split(':'); 
+
+            // fetch
+            var hours = Number(time[0]);
+            var minutes = Number(time[1]);
+            var seconds = Number(time[2]);
+
+            // calculate
+            var timeValue;
+
+            if (hours > 0 && hours <= 12)
+            {
+                timeValue= "" + hours;
+            } else if (hours > 12)
+            {
+                timeValue= "" + (hours - 12);
+            }
+            else if (hours == 0)
+            {
+                timeValue= "12";
+            }
+ 
+            timeValue += (minutes < 10) ? ":0" + minutes : ":" + minutes;  
+            timeValue += (seconds < 10) ? ":0" + seconds : ":" + seconds;  
+            timeValue += (hours >= 12) ? " P.M." : " A.M.";  
+
+            return timeValue;
+
+        }
+        function clearErrors(){
+            $('#warningBlankField').hide();
+            $('#errorSymbolNotFound').hide();
+            $('#warningAlreadyAdded').hide();
+            $('#error').hide();
+        }
+        function btnSearch(that){
+            window.event.preventDefault();
+            clearErrors();
+            var duplicate =false;
+           
+           
+            $('#txtSearch').val($('#txtSearch').val().replace(' ',''));
+            
+            if ($('#txtSearch').val()==""){
+                $('#warningBlankField').show();
+                
+                return false;
+            }
+
+            $("tr td:first-child").each(function() {
+     
+               if ($(this).html()==$('#txtSearch').val()){
+                
+                $('#warningAlreadyAdded').show();
+          
+                   duplicate = true;
+                   return false;
+               }
+
+               
+            });
+
+            if (duplicate==true){
+
+                return false;
+            }
+
+          
+         
+            $.getJSON('/quote/' + encodeURI($('#txtSearch').val()),function(data){
+               
+                clearErrors();
+                
+                var dataFromRequest=data.data;
+                
+                if (dataFromRequest.length==0){
+                    
+                    $('#errorSymbolNotFound').show();
+                    
+                    return;
+                }
+                
+                quotesTable.ajax.reload();
+                
+            }).fail(function(){
+                
+                    $('#error').show();
+                
+            });            
+        }
+        
+    </script>
+		                    <main role="main" class="container">
+							   <div class="row">
+							   	  <div class="col-lg">
+										<div class="form-group form-group-inline">
+								  			<input type="text" id="txtSearch" placeholder="Enter a symbol..." class="form-group text-search">
+								  			<button id="btnSearch" onClick="btnSearch(this);" class="btn btn-sm btn-search">Add Symbol</button>
+								  
+								  		</div>
+                                      <div id="warningBlankField" class="alert alert-warning" role="alert">
+                                            Field should not be blank.    
+                                      </div>
+                                      <div id="warningAlreadyAdded" class="alert alert-warning" role="alert">
+                                            The symbol has already been added to the watchlist.    
+                                        </div>
+                                      <div id="errorSymbolNotFound" class="alert alert-danger" role="alert">
+                                            The given symbol does not exist.    
+                                      </div>
+                                      <div id="error" class="alert alert-danger" role="alert">
+                                            Error Occured.    
+                                      </div>
+                                      
+								   </div>
+							   </div>
+							   
+							   <div class="row">
+							       <div class="col-lg">
+
+
+
+				       <table id="quotesTable" class="table table-striped table-bordered" cellspacing="0" width="100%">
+					               <thead>
+							                   <tr>
+										       <th>Symbol</th>
+												<th>Symbol Name</th>
+												<th>Last Price</th>
+												<th>Change</th>
+												<th>%Change</th>
+												<th>Volume</th>
+												<th>Time</th>
+												<th></th>
+												 </tr>
+									</thead>
+						</table>						
+						
+						      </div>	
+                                </div>
+																         
+				              </main>
+
+
+	<!-- Placed at the end of the document so the pages load faster -->
+	
+		<script src="/bower_components/jquery/dist/jquery.min.js"></script>
+		<script src="/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+		<script src="/bower_components/datatables.net-bs/js/jquery.bootstrap.min.js"></script>
+		<script src="/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+		
+		<script type="application/javascript">
+
+        $(function(){
+            
+            clearErrors();
+       
+        quotesTable=$('#quotesTable').DataTable({
+                "dom":"",
+                "ajax": "/quotes",
+                "language": {
+                        "emptyTable": "There are no symbols in you watchlist, please add one"
+                },
+                "columns":[
+                    { "data": "symbol" },
+                    { "data": "name" },
+                    { "data": "last" },
+                    { "data": "change" },
+                    { "data": "pctchange" },
+                    { "data": "volume" },
+                    { "data": "tradetime",
+                        render: function ( data, type, row ) {
+                        var dateSplit = data.split(' ');
+                            return type === "display" || type === "filter" ?
+                            militaryTimeConvertFrom(dateSplit.pop()) :
+                            data;
+                        }
+                    },
+                    { "data": "symbol",
+                     render: function ( data, type, row ) {
+                         return "<a href='#' onclick='hideQuote(this);' data-symbol='" + data + "' class='xLink'>x</a>";
+                        }
+                    
+                    }
+                ]
+                });
+
+
+        });  
+    
+        </script>
+
+
+
+
+</body>
+</html>
+
+

@@ -1,0 +1,27 @@
+{
+  "name": "barcharts",
+  "authors": [
+    "John Palmer <seanyainkiranina@yahoo.com>"
+  ],
+  "description": "test",
+  "main": "",
+  "moduleType": [],
+  "license": "MIT",
+  "homepage": "",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "datatables.net-bs": "~2.1.1",
+    "datatables.net-dt": "~3.2.2",
+    "datatables.net-responsive": "~2.2.0",
+    "datatables.net": "~1.10.16",
+    "jquery": "~3.2.1",
+    "datatables.net-responsive-bs": "~2.2.0"
+  }
+}
